@@ -1,50 +1,81 @@
 var router = require('express').Router()
 var Hero = require('../../model/hero')
+var Marvel = require('marvel')
+var marvel = new Marvel({ publicKey: "8e7d37ab249b9c2e8646b005aa6e72e6", privateKey: "89b9623a918a7973421a837965e94e1a57f3832b"})
 
 
 
-router.get('/heroes', function (req, res, next) {
-  var randomId = 1009629;
+router.get('/randomhero', function (req, res, next) {
+  var randomId = Math.floor(Math.random() * (999 - 000 + 1)) + 1009000;
+  var modelversion=3;
+   console.log(randomId)
  //Check if id in MongoDB.
-   Hero.findOne({id:randomId},function (err, hero) {
-     console.log('findOne');
-    if (err) { return next(err) }
+marvel.characters
+  .id(randomId)
+  .get(function(err, resp) {
+    if (err) { 
+      console.log("Error: ", err) 
+       var heroToSave = new Hero({
+            id: randomId,
+            name: 'No Hero Today',
+            modelVersion:modelversion,
+            valid:false
+            })
+       console.log(heroToSave)
+       heroToSave.save(function (err, hero) {
+          if (err) { return next(err) }
+           console.log('saved non existing hero');
+          res.status(201).json(hero)
+        })
+    }else { 
+      console.log(resp) 
 
-    if (!hero){
-             console.log('no hero');
-        //Get hero from API
-        var heroFromAPI  = {
-        "id": 1009629,
-        "name": "Storm",
-        "description": "Ororo Monroe is the descendant of an ancient line of African priestesses, all of whom have white hair, blue eyes, and the potential to wield magic.",
-        "modified": "2013-10-24T14:17:31-0400",
-        "thumbnail": {
-          "path": "http://i.annihil.us/u/prod/marvel/i/mg/6/40/526963dad214d",
-          "extension": "jpg"
-        },
-        "resourceURI": "http://gateway.marvel.com/v1/public/characters/1009629"
+      Hero.findOne({id:randomId},function (err, hero) {
+      if (err) { return next(err) }
+
+      if (!hero){
+          //Get hero from API
+          var heroFromAPI  = resp[0]
+           console.log(resp);
+
+        var heroToSave = new Hero({
+            id: heroFromAPI.id,
+            name: heroFromAPI.name,
+            description: heroFromAPI.description,
+            thumbnail_path:heroFromAPI.thumbnail.path,
+            thumbnail_extension:heroFromAPI.thumbnail.extension,
+            resourceURI:heroFromAPI.resourceURI,
+            modelVersion:modelversion,
+            valid:true
+            })
+       console.log(heroToSave)
+       heroToSave.save(function (err, hero) {
+          if (err) { return next(err) }
+           console.log('saved hero');
+          res.status(201).json(hero)
+        })
+      }else{
+          console.log('hero found');
+          res.json(hero)
       }
+  })
 
-      var heroToSave = new Hero({
-          id: heroFromAPI.id,
-          name: heroFromAPI.name,
-          description: heroFromAPI.description,
-          thumbnail_path:heroFromAPI.thumbnail.path,
-          thumbnail_extension:heroFromAPI.thumbnail.extension,
-          resourceURI:heroFromAPI.resourceURI,
-          modelVersion:0
-          })
-
-     heroToSave.save(function (err, hero) {
-        if (err) { return next(err) }
-         console.log('saved hero');
-        res.status(201).json(hero)
-      })
-    }else{
-        console.log('hero found');
-        res.json(hero)
     }
   })
+
+ 
   })
+
+router.get('/heroes', function (req, res, next) {
+   Hero.find({'valid':true})
+  .exec(function (err, heroes) {
+    if (err) { return next(err) }
+    res.json(heroes)
+
+  })
+
+ 
+  })
+
 
 module.exports = router

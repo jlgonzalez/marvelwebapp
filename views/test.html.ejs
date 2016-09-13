@@ -2,25 +2,45 @@
 <html ng-app='app'>
   <head>
     <link rel='stylesheet' href='http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'>
+    <link rel='stylesheet' href='/static/css/style.css'>
   </head>
   <body>
-    <div ng-controller='PostsCtrl' class='container'>
+    <div ng-controller='HeroesCtrl' class='container'>
       <h1>Daily</h1>
       <div class="panel-group">
         <div class="panel panel-primary">
           <div class="panel-heading">{{ hero.name}}</div>
-          <div class="panel-body">{{ hero.description}}</div>
+          <div class="panel-body">
+            <div class="hero-image">
+              <img class="img-thumbnail" src="{{hero.thumbnail_path}}/portrait_medium.{{hero.thumbnail_extension}}">
+            </div>
+            <div class="hero-desc">{{ hero.description}}</div>
+          </div>
         </div>
       </div>
        <form role='form'>
         <div class='form-group'>
           <div class="input-group">
             <span class='input-group-btn'>
-              <button ng-click='newMarvelHero()' class='btn btn-default'>New one</button>
+              <button ng-click='newMarvelHero()' class='btn btn-default'>Random!</button>
             </span>
           </div>
         </div>
       </form>
+
+      <h1>Other</h1>
+      <div class="row panel-group">
+        <div class="col-xs-6 col-md-2 panel panel-primary" ng-repeat="indhero in allheroes">
+          <div class="panel-heading">{{ indhero.name}}</div>
+          <div class="panel-body">
+            <div class="hero-image">
+              <img class="img-responsive img-thumbnail" src="{{indhero.thumbnail_path}}/portrait_medium.{{indhero.thumbnail_extension}}">
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </div>
     <script src='http://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-rc.4/angular.js'></script>
     <script src='/app.js'></script>

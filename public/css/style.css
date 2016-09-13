@@ -1,0 +1,7 @@
+.hero-image{}
+
+.hero-desc{}
+
+.panel-group .panel+.panel {
+    margin-left: 15px;
+}
